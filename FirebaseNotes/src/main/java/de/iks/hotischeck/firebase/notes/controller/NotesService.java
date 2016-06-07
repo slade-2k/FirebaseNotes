@@ -44,26 +44,36 @@ public class NotesService {
 	public boolean deleteNote(NotesModel notes, String source) {
 		String idString, tmpMessage;
 		
-		System.out.println("Choose the id to delete: ");
+		if (notes.messages.isEmpty()) {
+			return false;
+		}
+		
 		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
 		Scanner scanner = new Scanner(System.in);
 		Integer id = null;
 
 
-		while (id == null || id >= notes.messages.size() || id < 0) {
+		while (id == null) {
+			System.out.println("Choose the id to delete: ");
 			idString = scanner.nextLine();
 			
 			try {
 				id = Integer.parseInt(idString);
+				
+				if (id >= notes.messages.size() || id < 0) {
+					System.out.println("id must be a value from 0 to " + (notes.messages.size() - 1) + ".");
+					id = null;
+				}
+				
 			} catch (NumberFormatException e) {
-				System.out.println("rt");
+				System.out.println("Please only enter numbers");
 			}	
 		}
 			
 		tmpMessage = notes.messages.get(id);
 		notes.messages.remove(id.intValue());
 		
-		if (notesDAO.deleteNotes((new FirebaseConnector(source + id + ".json")).getConnection())) {
+		if (notesDAO.deleteNotes((new FirebaseConnector(source + "/" + id + ".json")).getConnection())) {
 			return true;
 		} else {
 			notes.messages.add(id, tmpMessage);
@@ -71,16 +81,17 @@ public class NotesService {
 		}
 	}
 	
-	public boolean deleteAllNotes(NotesModel notes) {
+	public boolean deleteAllNotes(NotesModel notes, String source) {	
+		if (notes.messages.isEmpty()) {
+			return false;
+		}
+		
 		notes.messages.removeAll(notes.messages);
 		
-		if (notesDAO.deleteNotes(fbConn.getConnection())) {
+		if (notesDAO.deleteNotes(new FirebaseConnector(source + ".json").getConnection())) {
 			return true;			
 		}
 		return false;
 	}
 	
-	public NotesModel getNotes() {
-		return notesDAO.fetchNotes(fbConn.getConnection());
-	}
 }

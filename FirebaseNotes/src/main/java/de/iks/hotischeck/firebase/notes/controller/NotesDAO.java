@@ -64,7 +64,7 @@ public class NotesDAO {
 		} finally {
 			conn.disconnect();
 		}
-		return notes;
+		return notes == null ? new NotesModel() : notes;
 	}
 	
 	public boolean deleteNotes(HttpURLConnection conn) {

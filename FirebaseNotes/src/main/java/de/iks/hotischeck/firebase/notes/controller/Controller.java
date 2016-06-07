@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -12,13 +12,13 @@ import java.util.Properties;
 
 import de.iks.hotischeck.firebase.notes.model.NotesModel;
 import de.iks.hotischeck.firebase.notes.model.Options;
-import de.iks.hotischeck.firebase.notes.util.FormatUtils;
+import de.iks.hotischeck.firebase.notes.util.SpacingUtils;
 
 public class Controller {
-
-	private NotesModel notes;
-	private HttpURLConnection conn;
-	private FirebaseConnector fbConn = null;
+	
+	private static final String CONFIG_PATH = "config.properties";
+	
+	private NotesModel notes = new NotesModel();
 	private NotesService notesService;
 	private Properties prop;
 
@@ -29,9 +29,13 @@ public class Controller {
 
 	public void init() {
 		
-		this.prop = this.getPropValues("config.properties");
+		this.prop = this.getPropValues(CONFIG_PATH);
 		this.notesService = new NotesService(prop.getProperty("source"));
-		this.notes = this.notesService.getNotes();
+		
+		if ((this.notes = notesService.fetchNotes()).messages == null) {
+			this.notes.messages = new ArrayList<>();
+			System.out.println("FirebaseNotes is empty! Created new List.\n");
+		}
 		
 		this.mainMenuLoop();
 		
@@ -52,31 +56,31 @@ public class Controller {
 				if (!this.notes.messages.isEmpty()) {
 					this.printNotes(this.notes);										
 				} else {
-					System.out.println("No entries.");
+					System.out.println("No entries.\n");
 				}
 				break;
 				
 			case ADD_NOTE: 
 				if (notesService.addNote(notes)) {
-					System.out.println("Note successfully added.");
+					System.out.println("Note successfully added.\n");
 				} else {
-					System.out.println("Note could not be added.");
+					System.out.println("Note could not be added.\n");
 				}
 				break;
 			
 			case DELETE_NOTE:
 				if (notesService.deleteNote(notes, prop.getProperty("noteSource"))) {
-					System.out.println("Note successfully deleted.");
+					System.out.println("Note successfully deleted.\n");
 				} else {
-					System.out.println("Error while trying to delete the note");
+					System.out.println("Error while trying to delete the note. Maybe there are no notes yet.\n");
 				}
 				break;
 				
 			case DELETE_ALL:
-				if (notesService.deleteAllNotes(notes)) {
-					System.out.println("Deleted all notes.");
+				if (notesService.deleteAllNotes(notes, prop.getProperty("noteSource"))) {
+					System.out.println("Deleted all notes.\n");
 				} else {
-					System.out.println("Error while trying to delete all notes");
+					System.out.println("Error while trying to delete all notes. Maybe there are no notes yet.\n");
 				}
 				break;
 				
@@ -95,27 +99,23 @@ public class Controller {
 	
 	private void showHelp() {
 		Properties helpProp = this.getPropValues("help.properties");
-		FormatUtils utils = new FormatUtils();
 		
+		List<Object> listOfProperties = Collections.list(helpProp.keys());
+		listOfProperties.sort(null);
 		
-		Enumeration<?> e = helpProp.propertyNames();
-		List lis = Collections.list(e);
-		Collections.sort(lis);
-		
-		for (int i = 0; i < lis.size(); i++) {
-			System.out.println(lis.get(i));
+		for (Object entry : listOfProperties) {
+			
+			SpacingUtils.setSpaces(listOfProperties);
+			SpacingUtils.setWildcard(' ');
+			SpacingUtils.printElementWithWildcard(entry.toString(), 2);
+
+			SpacingUtils.setSpaces(Collections.list(helpProp.elements()));
+			SpacingUtils.setWildcard(' ');
+			SpacingUtils.printElementWithWildcard(helpProp.getProperty(entry.toString()), 2);
+
+			System.out.println("");
 		}
-		
-		
-//		List<String> keys = utils.enumToArrayList(e);
-//		utils.getSpaces(keys, 1);
-		
-		while (e.hasMoreElements()) {
-			String key = e.nextElement().toString();
-//			utils.printSpaces(key);
-			System.out.println(helpProp.getProperty(key));
-		}
-		
+		System.out.println("");
 	}
 	
 	private Options promptForOption() {
