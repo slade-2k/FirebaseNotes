@@ -60,7 +60,7 @@ public class NotesService {
 			try {
 				id = Integer.parseInt(idString);
 				if (id >= notes.getMessages().size() || id < 0) {
-					System.out.println("id must be a value from 0 to " + (notes.getMessages().size() - 1) + ".");
+					System.out.println("id must be a value from 0 to " + (notes.getMessages().size() - 1) + ".\n");
 					id = null;
 				}
 				
