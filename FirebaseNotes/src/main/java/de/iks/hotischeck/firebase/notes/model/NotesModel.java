@@ -1,7 +1,16 @@
 package de.iks.hotischeck.firebase.notes.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NotesModel {
-	public List<String> messages;
+	private List<String> messages;
+	
+	public List<String> getMessages() {
+		return this.messages;
+	}
+	
+	public void createNewList() {
+		messages = new ArrayList<>();
+	}
 }

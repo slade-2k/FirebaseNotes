@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -31,8 +30,8 @@ public class Controller {
 		this.prop = this.getPropValues(CONFIG_PATH);
 		this.notesService = new NotesService(prop.getProperty("source"));
 		
-		if ((this.notes = notesService.fetchNotes()).messages == null) {
-			this.notes.messages = new ArrayList<>();
+		if ((this.notes = notesService.fetchNotes()).getMessages() == null) {
+			this.notes.createNewList();
 			System.out.println("FirebaseNotes is empty! Created new List.\n");
 		}
 		
@@ -52,7 +51,7 @@ public class Controller {
 				break;
 				
 			case GET_NOTES:
-				if (!this.notes.messages.isEmpty()) {
+				if (!this.notes.getMessages().isEmpty()) {
 					this.printNotes(this.notes);
 					System.out.println("");
 				} else {
@@ -162,8 +161,8 @@ public class Controller {
 	}
 	
 	private void printNotes(NotesModel notes) {
-		for (int i = 0; i < notes.messages.size(); i++) {
-			System.out.println(i + " | "+ notes.messages.get(i));
+		for (int i = 0; i < notes.getMessages().size(); i++) {
+			System.out.println(i + " | "+ notes.getMessages().get(i));
 		}
 	}
 
