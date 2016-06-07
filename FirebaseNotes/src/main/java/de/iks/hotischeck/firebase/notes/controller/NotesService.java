@@ -3,7 +3,6 @@ package de.iks.hotischeck.firebase.notes.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Scanner;
 
 import de.iks.hotischeck.firebase.notes.model.NotesModel;
@@ -48,7 +47,8 @@ public class NotesService {
 			return false;
 		}
 		
-		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+		//No resource leak, because jvm closes the System.in stream
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		Integer id = null;
 
@@ -59,7 +59,6 @@ public class NotesService {
 			
 			try {
 				id = Integer.parseInt(idString);
-				
 				if (id >= notes.messages.size() || id < 0) {
 					System.out.println("id must be a value from 0 to " + (notes.messages.size() - 1) + ".");
 					id = null;
@@ -72,7 +71,6 @@ public class NotesService {
 			
 		tmpMessage = notes.messages.get(id);
 		notes.messages.remove(id.intValue());
-		
 		if (notesDAO.deleteNotes((new FirebaseConnector(source + "/" + id + ".json")).getConnection())) {
 			return true;
 		} else {

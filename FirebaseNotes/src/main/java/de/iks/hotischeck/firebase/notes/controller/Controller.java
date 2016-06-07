@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -54,7 +53,8 @@ public class Controller {
 				
 			case GET_NOTES:
 				if (!this.notes.messages.isEmpty()) {
-					this.printNotes(this.notes);										
+					this.printNotes(this.notes);
+					System.out.println("");
 				} else {
 					System.out.println("No entries.\n");
 				}
